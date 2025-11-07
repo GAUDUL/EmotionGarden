@@ -1,79 +1,84 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class QuizUI : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI questionText;
-    [SerializeField] List<Question> questions = new List<Question>();
-    [SerializeField] Question currentQuestion;
-    [SerializeField] GameObject[] answerButtons;
+    [SerializeField] private TextMeshProUGUI questionText;
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private GameObject[] answerButtons;
+    [SerializeField] private GameObject nextButton;
+    [SerializeField] private QuizLogic quizLogic;
+    [SerializeField] private GameObject finalScorePanel;
+    [SerializeField] private TextMeshProUGUI finalScoreText;
+    [SerializeField] private TextMeshProUGUI rewardPointsText;
 
-    private int correctAnswerIndex;
-    private int cnt = 0;
-
+    private Question currentQuestion;
 
     void Start()
     {
-        GetNextQuestion();
+        ShowNextQuestion();
+        UpdateScore();
     }
 
     public void OnAnswerSelected(int index)
     {
-        correctAnswerIndex = currentQuestion.GetCorrectAnswerIndex();
+        bool isCorrect = quizLogic.CheckAnswer(index);
         string tip = currentQuestion.GetTip();
-        if (index == correctAnswerIndex)
-        {
-            questionText.text = "정답!" + $"\n{tip}";
-        }
-        else
-        {
-            string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
-            questionText.text = $"정답은 '{correctAnswer}' 입니다" + $"\n\n{tip}";
-        }
+        string correctAnswer = currentQuestion.GetAnswer(currentQuestion.GetCorrectAnswerIndex());
 
+        questionText.text = isCorrect
+            ? $"정답!\n{tip}"
+            : $"정답은 '{correctAnswer}' 입니다.\n\n{tip}";
+
+        UpdateScore();
         SetButtonState(false);
     }
-        public void GetNextQuestion()
-    {
-        if(questions.Count>0 && cnt < 5)
-        {
-            SetButtonState(true);
-            GetRandomQuestion();
-            DisplayQuestions();
-            cnt++;
-        }
-    }
-    
-    void DisplayQuestions()
-    {
-        TextMeshProUGUI buttonText;
-        questionText.text = currentQuestion.GetQuestion();
-        for (int i = 0; i < 4; i++)
-        {
-            buttonText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
 
-            buttonText.text = currentQuestion.GetAnswer(i);
+    public void ShowNextQuestion()
+    {
+        if (!quizLogic.HasMoreQuestions)
+        {
+            int finalScore = quizLogic.GetScore();
+            int rewardPoints = finalScore;
+
+            questionText.text = "퀴즈가 모두 끝났습니다!";
+            finalScoreText.text = $"최종 점수: {finalScore}점";
+            rewardPointsText.text = $"획득한 감정포인트: {rewardPoints}포인트";
+            nextButton.SetActive(false);
+            UIManager.Instance.OpenModal(finalScorePanel);
+
+            GameManager.Instance.AddEmotionPoints(rewardPoints);
+
+            return;
+        }
+
+        currentQuestion = quizLogic.GetNextQuestion();
+        DisplayQuestion(currentQuestion);
+        SetButtonState(true);
+    }
+
+    void DisplayQuestion(Question question)
+    {
+        questionText.text = question.GetQuestion();
+        for (int i = 0; i < answerButtons.Length; i++)
+        {
+            TextMeshProUGUI btnText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+            btnText.text = question.GetAnswer(i);
         }
     }
 
     void SetButtonState(bool state)
     {
-        for (int i = 0; i < answerButtons.Length; i++)
-        {
-            Button button = answerButtons[i].GetComponent<Button>();
-            button.interactable = state;
-        }
-    }
-    
-    void GetRandomQuestion()
-    {
-        int index = Random.Range(0, questions.Count);
-        currentQuestion = questions[index];
+        foreach (GameObject btn in answerButtons)
+            btn.GetComponent<Button>().interactable = state;
 
-        if(questions.Contains(currentQuestion))
-            questions.Remove(currentQuestion);
-        
+        nextButton.GetComponent<Button>().interactable = !state;
     }
+
+    void UpdateScore()
+    {
+        scoreText.text = $"점수 {quizLogic.GetScore()}";
+    }
+
 }

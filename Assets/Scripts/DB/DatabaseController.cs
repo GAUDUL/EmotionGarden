@@ -20,28 +20,48 @@ public class DatabaseController : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        string dbPath = Path.Combine(Application.persistentDataPath, dbName);
+        string dbPath = GetDatabasePath(dbName);
+        _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+        _characterId = GetOrCreateDefaultCharacter();
+    }
 
+    
+    private string GetDatabasePath(string dbName)
+    {
+        string persistentPath = Path.Combine(Application.persistentDataPath, dbName);
+        string streamingPath = Path.Combine(Application.streamingAssetsPath, dbName);
 
-        if (!File.Exists(dbPath))
+    #if UNITY_EDITOR
+        bool forceReset = false;
+
+        if (forceReset && File.Exists(persistentPath))
         {
-            string sourcePath = Path.Combine(Application.streamingAssetsPath, dbName);
+            File.Delete(persistentPath);
+        }
 
-            if (sourcePath.Contains("://") || sourcePath.Contains(":///"))
+        if (!File.Exists(persistentPath))
+        {
+            File.Copy(streamingPath, persistentPath);
+        }
+
+        return persistentPath;
+    #else
+        if (!File.Exists(persistentPath))
+        {
+            if (streamingPath.Contains("://") || streamingPath.Contains(":///"))
             {
-                UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Get(sourcePath);
+                var www = UnityEngine.Networking.UnityWebRequest.Get(streamingPath);
                 www.SendWebRequest();
                 while (!www.isDone) { }
-                File.WriteAllBytes(dbPath, www.downloadHandler.data);
+                File.WriteAllBytes(persistentPath, www.downloadHandler.data);
             }
             else
             {
-                File.Copy(sourcePath, dbPath);
+                File.Copy(streamingPath, persistentPath);
             }
         }
-
-        _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
-        _characterId = GetOrCreateDefaultCharacter();
+        return persistentPath;
+    #endif
     }
 
     private int GetOrCreateDefaultCharacter()
