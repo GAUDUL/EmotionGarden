@@ -29,9 +29,9 @@ public class GameManager : MonoBehaviour
         EmotionPoints = DatabaseController.Instance.GetEmotionPoints();
     }
 
-    public void AddEmotionPoints(int amount)
+    public void AddEmotionPoints(int points)
     {
-        EmotionPoints += amount;
+        EmotionPoints += points;
         DatabaseController.Instance.UpdateEmotionPoints(EmotionPoints);
     }
 }
