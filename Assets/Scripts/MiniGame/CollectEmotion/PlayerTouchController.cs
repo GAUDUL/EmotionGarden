@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class PlayerTouchController : MonoBehaviour
 {
     [SerializeField] private RectTransform canvasRect;
     [SerializeField] private float minX = -400f;
@@ -19,7 +19,7 @@ public class NewBehaviourScript : MonoBehaviour
 
     void Update()
     {
- Vector2 localPoint;
+        Vector2 localPoint;
 
         // 모바일
         if (Input.touchCount > 0)
