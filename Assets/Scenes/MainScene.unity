@@ -2842,11 +2842,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5338621442344452477, guid: 7c945810b9a019649898cf95c9646fbf, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
-      value: RythmScene
+      value: RhythmScene
       objectReference: {fileID: 0}
     - target: {fileID: 5338621442344452477, guid: 7c945810b9a019649898cf95c9646fbf, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 8456162107958530858, guid: 7c945810b9a019649898cf95c9646fbf, type: 3}
+      propertyPath: m_Name
+      value: Rhythm
       objectReference: {fileID: 0}
     - target: {fileID: 8589045267417203883, guid: 7c945810b9a019649898cf95c9646fbf, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
