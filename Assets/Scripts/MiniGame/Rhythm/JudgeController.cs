@@ -10,6 +10,7 @@ public class JudgeController : MonoBehaviour
     [SerializeField] private GameObject finalScorePanel;
     [SerializeField] private TextMeshProUGUI finalScoreText;
     [SerializeField] private TextMeshProUGUI rewardPointsText;
+    [SerializeField] private PlayerState playerState;
             
     private int score = 0;
 
@@ -30,6 +31,7 @@ public class JudgeController : MonoBehaviour
         {
             score += noteScore;
             Debug.Log("Good!");
+            playerState.PlayBloom();
             UpdateUI();
         }
         else
