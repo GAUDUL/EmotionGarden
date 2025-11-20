@@ -34,4 +34,10 @@ public class GameManager : MonoBehaviour
         EmotionPoints += points;
         DatabaseController.Instance.UpdateEmotionPoints(EmotionPoints);
     }
+
+    public void UseEmotionPoints(int price)
+    {
+        EmotionPoints -= price;
+        DatabaseController.Instance.UpdateEmotionPoints(EmotionPoints);
+    }
 }

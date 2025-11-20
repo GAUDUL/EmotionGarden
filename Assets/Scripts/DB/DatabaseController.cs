@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using SQLite4Unity3d;
 using UnityEngine;
+using EmotionGarden.Models;
 
 public class DatabaseController : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class DatabaseController : MonoBehaviour
 
         string dbPath = GetDatabasePath(dbName);
         _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+
+        SeedItems();
         _characterId = GetOrCreateDefaultCharacter();
     }
 
@@ -64,6 +67,19 @@ public class DatabaseController : MonoBehaviour
     #endif
     }
 
+    private void SeedItems()
+    {
+        var initialItems = ItemSeeder.GetInitialItems();
+        foreach (var item in initialItems)
+        {
+            var exists = _connection.Table<Item>().Where(i => i.item_id == item.item_id).FirstOrDefault();
+            if (exists == null)
+            {
+                _connection.Insert(item);
+            }
+        }
+    }
+
     private int GetOrCreateDefaultCharacter()
     {
         var character = _connection.Table<Character>().FirstOrDefault();
@@ -83,7 +99,19 @@ public class DatabaseController : MonoBehaviour
         return _connection.Query<Item>(sql);
     }
 
-    // 아이템 추가
+    //타입 별 아이템 조회
+    public List<Item> GetMyItemsByType(string type)
+    {
+        string sql = @"SELECT Item.item_id, Item.name, Item.price, Item.type
+                    FROM Item
+                    INNER JOIN CharacterItem 
+                        ON Item.item_id = CharacterItem.item_id
+                    WHERE Item.type = ?";
+        return _connection.Query<Item>(sql, type);
+    }
+
+    // 상점
+    // 아이템 구매
     public void AddItem(int itemId)
     {
         var exists = _connection.Table<CharacterItem>()
@@ -93,6 +121,13 @@ public class DatabaseController : MonoBehaviour
         {
             _connection.Insert(new CharacterItem { item_id = itemId });
         }
+    }
+
+    //상점 아이템 리스트
+    public List<ItemIdPriceName> GetItemsByType(string type)
+    {
+        string sql = "SELECT item_id, price, name FROM Item WHERE type = ?";
+        return _connection.Query<ItemIdPriceName>(sql, type);
     }
 
     // 감정 포인트 조회
