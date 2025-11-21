@@ -9,6 +9,8 @@ public class ObjectSpawner : MonoBehaviour
     [SerializeField] private GameObject positiveObj;
     [SerializeField] private GameObject negativeObj;
     [SerializeField] private WordData wordData;
+    [SerializeField] private List<Sprite> positiveSprites;
+    [SerializeField] private List<Sprite> negativeSprites;
     [SerializeField] private RectTransform playerRect;
     [SerializeField] private float spawnInterval = 1f;
 
@@ -35,6 +37,7 @@ public class ObjectSpawner : MonoBehaviour
         GameObject prefab = isPositive ? positiveObj : negativeObj;
 
         GameObject wordObj = Instantiate(prefab, canvasRect);
+        wordObj.transform.SetAsLastSibling();
         RectTransform wordRect = wordObj.GetComponent<RectTransform>();
 
         float minX = -canvasRect.sizeDelta.x / 2 + wordRect.sizeDelta.x / 2;
@@ -48,6 +51,15 @@ public class ObjectSpawner : MonoBehaviour
                     : wordData.NegativeWords[Random.Range(0, wordData.NegativeWords.Count)];
 
         wordObj.GetComponentInChildren<TMP_Text>().text = word;
+
+        var imageComp = wordObj.GetComponentInChildren<UnityEngine.UI.Image>();
+        if (imageComp != null)
+        {
+            if (isPositive && positiveSprites.Count > 0)
+                imageComp.sprite = positiveSprites[Random.Range(0, positiveSprites.Count)];
+            else if (!isPositive && negativeSprites.Count > 0)
+                imageComp.sprite = negativeSprites[Random.Range(0, negativeSprites.Count)];
+        }
 
         FallingObject falling = wordObj.GetComponent<FallingObject>();
         falling.type = isPositive ? WordType.Positive : WordType.Negative;

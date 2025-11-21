@@ -24,7 +24,7 @@ public class MainSceneUI : MonoBehaviour
 
     void UpdatePointsUI()
     {
-        pointsText.text = $"감정포인트: {GameManager.Instance.EmotionPoints}";
+        pointsText.text = $"{GameManager.Instance.EmotionPoints}";
     }
 
     public void onOpenModalButtonClicked(GameObject modal)

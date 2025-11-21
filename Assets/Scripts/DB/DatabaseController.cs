@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using SQLite4Unity3d;
 using UnityEngine;
+using EmotionGarden.Models;
 
 public class DatabaseController : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class DatabaseController : MonoBehaviour
 
         string dbPath = GetDatabasePath(dbName);
         _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+
+        SeedItems();
         _characterId = GetOrCreateDefaultCharacter();
     }
 
@@ -64,6 +67,19 @@ public class DatabaseController : MonoBehaviour
     #endif
     }
 
+    private void SeedItems()
+    {
+        var initialItems = ItemSeeder.GetInitialItems();
+        foreach (var item in initialItems)
+        {
+            var exists = _connection.Table<Item>().Where(i => i.item_id == item.item_id).FirstOrDefault();
+            if (exists == null)
+            {
+                _connection.Insert(item);
+            }
+        }
+    }
+
     private int GetOrCreateDefaultCharacter()
     {
         var character = _connection.Table<Character>().FirstOrDefault();
@@ -75,18 +91,33 @@ public class DatabaseController : MonoBehaviour
         return character.Id;
     }
 
-    // 캐릭터 아이템 조회
+
+    // 보유 중인 모든 아이템 조회
     public List<Item> GetMyItems()
     {
         string sql = @"SELECT Item.* FROM Item 
                        INNER JOIN CharacterItem ON Item.item_id = CharacterItem.item_id";
         return _connection.Query<Item>(sql);
     }
+
+    //보유 중인 타입 별 아이템 조회
+    public List<Item> GetMyItemsByType(string type)
+    {
+        string sql = @"SELECT Item.item_id, Item.name, Item.price, Item.type
+                    FROM Item
+                    INNER JOIN CharacterItem 
+                        ON Item.item_id = CharacterItem.item_id
+                    WHERE Item.type = ?";
+        return _connection.Query<Item>(sql, type);
+    }
+
     
     // 꽃 아이템 조회
     public List<Item> GetFlowerItems()
     {
-        string sql = @"SELECT Item.* FROM Item";
+        string sql = @"SELECT Item.* 
+                    FROM Item
+                    WHERE type = 'flower'";
         return _connection.Query<Item>(sql);
     }
     // 특정 아이템 조회
@@ -95,7 +126,17 @@ public class DatabaseController : MonoBehaviour
         return GetFlowerItems().Find(item => item.item_id == itemId);
     }
 
-    // 아이템 추가
+    //타입 별 아이템 조회
+    public List<Item> GetAllItemsByType(string type)
+    {
+        string sql = @"SELECT Item.* 
+                    FROM Item
+                    WHERE type = ?";
+        return _connection.Query<Item>(sql, type);
+    }
+
+    // 상점
+    // 아이템 구매
     public void AddItem(int itemId)
     {
         var exists = _connection.Table<CharacterItem>()
@@ -105,6 +146,13 @@ public class DatabaseController : MonoBehaviour
         {
             _connection.Insert(new CharacterItem { item_id = itemId });
         }
+    }
+
+    //상점 아이템 리스트
+    public List<ItemIdPriceName> GetItemsByType(string type)
+    {
+        string sql = "SELECT item_id, price, name FROM Item WHERE type = ?";
+        return _connection.Query<ItemIdPriceName>(sql, type);
     }
 
     // 감정 포인트 조회
@@ -125,10 +173,47 @@ public class DatabaseController : MonoBehaviour
         }
     }
     
-    // 감정저장소 조회
+    // 감정저장소
+    // 특정 날짜 기록 1건 조회
     public Diary GetDiary(string date)
     {
         return _connection.Table<Diary>().Where(d => d.date == date).FirstOrDefault();
+    }
+    
+    //오늘 기록 여부
+    public bool HasDiaryToday()
+    {
+    string today = System.DateTime.Now.ToString("yyyy-MM-dd");
+    var diary = _connection.Table<Diary>().Where(d => d.date == today).FirstOrDefault();
+    return diary != null;
+    }
+
+    // 저장 또는 업데이트 (하루 1회)
+    public void SaveDiary(string date, string mood)
+    {
+        var existing = _connection.Table<Diary>().Where(d => d.date == date).FirstOrDefault();
+
+        if (existing == null)
+        {
+            _connection.Insert(new Diary
+            {
+                date = date,
+                mood = mood
+            });
+        }
+        else
+        {
+            existing.mood = mood;
+            _connection.Update(existing);
+        }
+    }
+
+    // 특정 월 전체 기록 조회
+    public List<Diary> GetDiaryByMonth(int year, int month)
+    {
+        string prefix = $"{year}-{month:D2}";
+        string sql = $"SELECT * FROM Diary WHERE date LIKE '{prefix}-%'";
+        return _connection.Query<Diary>(sql);
     }
 
 

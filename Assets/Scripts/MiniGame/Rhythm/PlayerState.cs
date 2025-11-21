@@ -1,26 +1,56 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerState : MonoBehaviour
 {
-    private SpriteRenderer spriteRenderer;
-    
-    public Color normalColor = Color.white;
-    public Color smilingColor = Color.yellow;
+    private Image image;
+    private Sprite idleSprite;
+
+    [SerializeField] Sprite bloomingSprite;
+    [SerializeField] Sprite bloomSprite;
+    [SerializeField] private float bloomDuration = 0.15f;
+
+    private bool playBloomOnce = false;
+    private float bloomTimer = 0f;
+
 
     private bool useCameraDetection = false; //나중에 카메라 연결 시
     public bool isSmiling;
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        image = GetComponent<Image>();
+        idleSprite = image.sprite;
     }
 
     void Update()
     {
         isSmiling = CheckSmile();
-        spriteRenderer.color = isSmiling ? smilingColor : normalColor;
+
+        if (playBloomOnce)
+        {
+            bloomTimer += Time.deltaTime;
+            image.sprite = bloomSprite;
+
+            if (bloomTimer >= bloomDuration)
+            {
+                playBloomOnce = false;
+            }
+            return;
+        }
+
+        if (isSmiling)
+            image.sprite = bloomingSprite;
+        else
+            image.sprite = idleSprite;
     }
-    
+
+    public void PlayBloom()
+    {
+        playBloomOnce = true;
+        bloomTimer = 0f;
+    }    
+
     bool CheckSmile()
     {
         if (useCameraDetection)
