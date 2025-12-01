@@ -6,7 +6,7 @@ using Google.Protobuf;
 public class SmileDetector : MonoBehaviour
 {
     public bool isSmiling;
-    public float smileScore;  // debug ¿ë
+    public float smileScore;  // debug ï¿½ï¿½
 
     public void Check(List<NormalizedLandmarkList> faces)
     {
@@ -22,29 +22,29 @@ public class SmileDetector : MonoBehaviour
         var R = face.Landmark[291];
         var T = face.Landmark[13];  // top lip
         var B = face.Landmark[14];  // bottom lip
-        var C = face.Landmark[0];   // mid/lip center reference (¾ó±¼ Áß½É)
-        // ±¤´ë
+        var C = face.Landmark[0];   // mid/lip center reference (ï¿½ï¿½ ï¿½ß½ï¿½)
+        // ï¿½ï¿½ï¿½ï¿½
         var leftCheek = face.Landmark[234];
         var rightCheek = face.Landmark[454];
 
-        // 3) ±¤´ë »ó½Â
+        // 3) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
         float leftCheekLift = C.Y - leftCheek.Y;
         float rightCheekLift = C.Y - rightCheek.Y;
         float cheekScore = (leftCheekLift + rightCheekLift) * 5f;  // 0.0~0.3
 
-        // 1) ÀÔ Æø (ÁÂ¿ì)
+        // 1) ï¿½ï¿½ ï¿½ï¿½ (ï¿½Â¿ï¿½)
         float width = Mathf.Abs(R.X - L.X);
         float height = Mathf.Abs(T.Y - B.Y);
         float stretchScore = width / height;
 
-        // 2) ÀÔ²¿¸® ¿Ã¶ó°£ Á¤µµ
+        // 2) ï¿½Ô²ï¿½ï¿½ï¿½ ï¿½Ã¶ï¿½ ï¿½ï¿½ï¿½ï¿½
         float leftLift = C.Y - L.Y;
         float rightLift = C.Y - R.Y;
-        float liftScore = (leftLift + rightLift) * 5f;  // °¡ÁßÄ¡
+        float liftScore = (leftLift + rightLift) * 5f;  // ï¿½ï¿½ï¿½ï¿½Ä¡
 
-        // 3) ÃÖÁ¾
+        // 3) ï¿½ï¿½ï¿½ï¿½
         float smileScore = stretchScore + liftScore + cheekScore;
 
-        isSmiling = smileScore > 2.5f;
+        isSmiling = smileScore > 3.0f;
     }
 }
