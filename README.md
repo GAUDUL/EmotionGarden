@@ -25,3 +25,9 @@ Emotion Garden은 표정 인식 기반 감정 분석을 통해 사용자의 정�
 - [“Retro Game Notification” by Mixkit, Mixkit Free Sound Effects ](https://mixkit.co/free-sound-effects/video-game/)
 - [“Tech Break Fail” by Mixkit, Mixkit Free Sound Effects](https://mixkit.co/free-sound-effects/break/)
 - [“Wood Hard Hit” by Mixkit, Mixkit Free Sound Effects](https://mixkit.co/free-sound-effects/wood/)
+
+
+### 시연 영상
+<img width="600" height="300" alt="Image" src="https://github.com/user-attachments/assets/b804ab71-b65b-4415-8ad0-351059d4db7b" />
+
+링크: https://youtu.be/DHam86GL_W0
